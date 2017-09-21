@@ -1,6 +1,8 @@
+const amqp = require('amqplib/callback_api');
 const WebSocketServer = require('websocket').server
 const http = require('http')
 const config = require('./config')
+const queue = 'crawler_task'
 
 console.log('Indexer', config.port)
 
@@ -52,5 +54,18 @@ wsServer.on('request', function(request) {
 	})
 	connection.on('close', function(reasonCode, description) {
 		console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+	})
+})
+
+amqp.connect('amqp://localhost', (err, conn) => {
+	conn.createChannel((err, ch) => {
+		ch.assertQueue(queue, {durable: false});
+		//console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
+
+		ch.consume(queue, (msg) => {
+			// console.log(" [x] Received %s", msg.content.toString())
+			const data = JSON.parse(msg.content)
+			console.log('DATA:', data);
+		}, {noAck: true});
 	})
 })

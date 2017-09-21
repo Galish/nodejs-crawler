@@ -8,7 +8,11 @@ export default class Form extends React.PureComponent {
 	}
 
 	onClick = () => {
-		this.props.onSend({message: this.state.input})
+		const {input: message} = this.state
+
+		if (!message) return
+
+		this.props.onSend({message})
 		this.setState({input: ''})
 	}
 
