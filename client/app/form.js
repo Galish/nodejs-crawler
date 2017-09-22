@@ -8,11 +8,13 @@ export default class Form extends React.PureComponent {
 	}
 
 	onClick = () => {
-		const {input: message} = this.state
+		const {input} = this.state
 
-		if (!message) return
+		if (!input) return
 
-		this.props.onSend({message})
+		this.props.onSend({
+			search: input.toLowerCase()
+		})
 		this.setState({input: ''})
 	}
 
@@ -23,7 +25,8 @@ export default class Form extends React.PureComponent {
 	render() {
 		return (
 			<div>
-				<textarea value={this.state.input}
+				<input type="text"
+					value={this.state.input}
 					onChange={this.onTextInput} />
 
 				<button onClick={this.onClick}>

@@ -9,17 +9,9 @@ export default class Board extends React.PureComponent {
 
 	componentWillReceiveProps({update}) {
 		if (update) {
-			console.log({update});
-			if (update.message) {
+			if (update.messages) {
 				this.setState({
-					messages: [
-						...this.state.messages,
-						{
-							text: update.message,
-							timestamp: update.timestamp,
-							receivedAt: (+new Date)
-						}
-					]
+					messages: update.messages
 				})
 			}
 		}
@@ -28,9 +20,10 @@ export default class Board extends React.PureComponent {
 	render() {
 		return (
 			<div>
-				{this.state.messages.map(({text, receivedAt}, i) =>
+				{this.state.messages.map(({text, title, receivedAt}, i) =>
 					<div className="message"
 						key={i}>
+						<big>{title}</big>
 						{text}
 						<small>{moment(receivedAt).format('LLL')}</small>
 					</div>

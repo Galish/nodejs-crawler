@@ -1,3 +1,4 @@
+import config from '../../config'
 import Board from './board'
 import Form from './form'
 import WSController from './wscontroller'
@@ -17,7 +18,7 @@ class App extends React.PureComponent {
 	render() {
 		return (
 			<div>
-				<WSController url="ws://localhost:8080/">
+				<WSController url={`ws://localhost:${config.websocketsPort}/`}>
 					<Content />
 				</WSController>
 			</div>

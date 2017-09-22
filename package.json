@@ -8,12 +8,13 @@
     "start:client": "http-server ./client/public -p 8000",
     "start:indexer": "node indexer/index.js",
     "start:crawler": "node crawler/index.js",
-	"dev": "npm-run-all --parallel dev:client dev:indexer dev:crawler",
+    "dev": "npm-run-all --parallel dev:client dev:indexer dev:crawler",
     "dev:client": "NODE_ENV=development webpack-dev-server --config client/webpack.config.js",
     "dev:indexer": "nodemon indexer/index.js",
     "dev:crawler": "nodemon crawler/index.js",
     "build": "NODE_ENV=production webpack --config client/webpack.config.js",
-    "amqp": "rabbitmq-server —start"
+    "amqp": "rabbitmq-server —start",
+    "redis": "redis-server"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,9 @@
     "npm-run-all": "^4.1.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "redis": "^2.8.0",
+    "redis-server": "^1.1.0",
+    "search-index": "^0.13.0",
     "websocket": "^1.0.24"
   },
   "devDependencies": {

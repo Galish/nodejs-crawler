@@ -1,38 +1,25 @@
 const amqp = require('amqplib/callback_api')
-const queue = 'crawler_task'
+const config = require('../config')
+const dummyData = require('./dummydata')
 
-amqp.connect('amqp://localhost', (err, conn) => {
+amqp.connect(config.amqpServer, (err, conn) => {
 	if (err) return
 
 	conn.createChannel((err, ch) => {
-		ch.assertQueue(queue, {durable: false})
+		ch.assertQueue(config.queueName, {durable: false})
 
-		setTimeout(() => {
-			const data = {
-				title: 'Message title',
-				text: 'Some sample text'
-			}
-			ch.sendToQueue(queue, new Buffer(JSON.stringify(data)))
+		setTimeout(function () {
+			dummyData.forEach(message => {
+				ch.sendToQueue(config.queueName, new Buffer(JSON.stringify(message)))
+			})
 		}, 3000)
 
-		// setTimeout(function () {
-		// 	// Note: on Node 6 Buffer.from(msg) should be used
-		// 	ch.sendToQueue(q, new Buffer('Hello World!'));
-		// 	console.log(" [x] Sent 'Hello World!'");
-		// }, 1000);
-		//
-		// setTimeout(function () {
-		// 	// Note: on Node 6 Buffer.from(msg) should be used
-		// 	ch.sendToQueue(q, new Buffer('Hello World 2'));
-		// 	console.log(" [x] Sent 'Hello World 2'");
-		// }, 2000);
-		//
-		// setTimeout(function () {
-		// 	// Note: on Node 6 Buffer.from(msg) should be used
-		// 	ch.sendToQueue(q, new Buffer('Hello World 3'));
-		// 	console.log(" [x] Sent 'Hello World 3'");
-		// }, 3000);
-
-
+		// setTimeout(() => {
+		// 	const data = {
+		// 		title: 'Message title',
+		// 		text: 'Some sample text'
+		// 	}
+		// 	ch.sendToQueue(config.queueName, new Buffer(JSON.stringify(data)))
+		// }, 3000)
 	})
 })

@@ -1,7 +1,7 @@
+const {clientPort} = require('../config')
 const path = require('path')
 const webpack = require('webpack')
 const pkg = require('../package.json')
-const port = 8000
 
 const config = {
 	devtool: 'source-map',
@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === 'production') {
 		contentBase: path.join(__dirname, 'public'),
 		inline: true,
 		host: '0.0.0.0',
-		port
+		port: clientPort
 	}
 }
 
