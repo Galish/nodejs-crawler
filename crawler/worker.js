@@ -41,7 +41,7 @@ class Worker {
 			return
 		}
 
-		console.log('> AMQP sent message №' + message.index + ' #' + message.id)
+		console.log('> AMQP sent message #' + message.id)
 		this.channel.sendToQueue(config.queueName, new Buffer(JSON.stringify(message)))
 	}
 }

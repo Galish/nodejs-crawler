@@ -225,7 +225,7 @@ class Crawler {
 				link,
 				avatar: !!avatarImg.length && avatarImg.attr('src') || '',
 				title: $(item).find('.postbody .post-entry .entry-title').text(),
-				content: $(item).find('.postbody .post-entry .entry-content').text()
+				content: $(item).find('.postbody .post-entry .entry-content').html()
 			}
 
 			this.onSendMessage(message)

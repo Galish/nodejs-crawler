@@ -58,9 +58,10 @@ export default class Board extends React.PureComponent {
 						<div className="message__title">
 							{message.title}
 						</div>
-						<div className="message__content">
-							{message.content}
-						</div>
+						<div className="message__content"
+							dangerouslySetInnerHTML={{
+								__html: message.content
+							}} />
 						<div className="message__author">
 							{/*<img src={message.avatar} />*/}
 							Author: <b>{message.author}</b>
