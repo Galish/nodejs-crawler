@@ -3,7 +3,7 @@ export default class Board extends React.PureComponent {
 		super(props)
 
 		this.state = {
-			messages: []
+			messages: null
 		}
 	}
 
@@ -17,15 +17,60 @@ export default class Board extends React.PureComponent {
 		}
 	}
 
+	get messages() {
+		return (this.state.messages || []).sort(this.sortByDate)
+	}
+
+	sortByDate(itemA, itemB) {
+		return itemA.date === itemB.date
+			? 0
+			: (itemA.date > itemB.date
+				? -1
+				: 1
+			)
+	}
+
+	renderNotification = () => {
+		const {messages} = this.state
+
+		if (messages && !messages.length) {
+			return (
+				<div>
+					No messages found
+				</div>
+			)
+		}
+
+		return null
+	}
+
 	render() {
 		return (
 			<div>
-				{this.state.messages.map(({text, title, receivedAt}, i) =>
+				{this.renderNotification()}
+
+				{this.messages.map((message, i) =>
 					<div className="message"
 						key={i}>
-						<big>{title}</big>
-						{text}
-						<small>{moment(receivedAt).format('LLL')}</small>
+						<div className="message__date">
+							{moment(message.date).format('LLL')}
+						</div>
+						<div className="message__title">
+							{message.title}
+						</div>
+						<div className="message__content">
+							{message.content}
+						</div>
+						<div className="message__author">
+							{/*<img src={message.avatar} />*/}
+							Author: <b>{message.author}</b>
+						</div>
+
+						<a className="message__link"
+							href={message.link}
+							target="_blank">
+							{message.link}
+						</a>
 					</div>
 				)}
 			</div>

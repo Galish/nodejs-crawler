@@ -3,7 +3,8 @@ const config = require('../config')
 
 class Worker {
 	constructor(storage) {
-		this.storage = storage
+		this.channel = null
+		this.sendMessage = this.sendMessage.bind(this)
 	}
 
 	init() {
@@ -24,20 +25,24 @@ class Worker {
 						return
 					}
 
-					ch.assertQueue(config.queueName, {durable: false})
 					console.log('> AMQP channel is created')
-
 					resolve(ch)
 
-					ch.consume(config.queueName, ({content}) => {
-						const message = JSON.parse(content)
-
-						console.log('> AMQP got message #' + message.id)
-						this.storage.pushItem(message)
-					}, {noAck: true})
+					ch.assertQueue(config.queueName, {durable: false})
+					this.channel = ch
 				})
 			})
 		})
+	}
+
+	sendMessage(message) {
+		if (!this.channel) {
+			console.log('> ERR: AMQP message can\'t be send')
+			return
+		}
+
+		console.log('> AMQP sent message №' + message.index + ' #' + message.id)
+		this.channel.sendToQueue(config.queueName, new Buffer(JSON.stringify(message)))
 	}
 }
 

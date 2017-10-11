@@ -3,10 +3,6 @@ export default class WSController extends React.Component {
 		url: React.PropTypes.string
 	}
 
-	static defaultProps = {
-		// disableWS: false
-	}
-
 	constructor(props, context) {
 		super(props, context)
 		this.state = {
@@ -44,7 +40,7 @@ export default class WSController extends React.Component {
 	}
 
 	onMessage = (e) => {
-		console.log(' > WS message', JSON.parse(e.data))
+		// console.log(' > WS message', JSON.parse(e.data))
 		this.setState({
 			update: JSON.parse(e.data),
 			timestamp: e.timeStamp
@@ -52,7 +48,7 @@ export default class WSController extends React.Component {
 	}
 
 	onOpen = (e) => {
-		console.log(' > WS open')
+		// console.log(' > WS open')
 		this.setState({isOpened: true})
 		this.props.onReady && this.props.onReady()
 	}
@@ -64,7 +60,7 @@ export default class WSController extends React.Component {
 	}
 
 	onSend = (message) => {
-		console.log(' > WS send', message)
+		// console.log(' > WS send', message)
 		this.ws.send(JSON.stringify(message))
 	}
 
@@ -76,16 +72,19 @@ export default class WSController extends React.Component {
 		}
 	}
 
+	get isWSReady() {
+		return !!this.ws && (this.ws.readyState === 1 || this.ws.readyState === 2)
+	}
+
 	render() {
-		const {onClose, onMessage, onOpen, onError, onSend, update} = this
+		const {isWSReady, onClose, onMessage, onOpen, onError, onSend, update} = this
 		const {isOpened} = this.state
 		const {children} = this.props
 
-		if (!isOpened) return null
 
 		return React.cloneElement(
 			children,
-			{onClose, onMessage, onOpen, onError, onSend, update}
+			{isWSReady, onClose, onMessage, onOpen, onError, onSend, update}
 		)
 	}
 }

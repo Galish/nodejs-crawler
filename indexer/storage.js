@@ -12,13 +12,13 @@ class Storage {
 		}
 		this.batchOptions = {
 			title: {
-				compositeField: true,
+				compositeField: false,
 				fieldOptions: {
 					preserveCase: false
 				}
 			},
-			text: {
-				compositeField: true,
+			content: {
+				compositeField: false,
 				fieldOptions: {
 					preserveCase: false
 				}
@@ -27,32 +27,80 @@ class Storage {
 	}
 
 	init() {
-		this.initRedis()
-		this.initIndex()
-		this.indexData()
+		return Promise.all([this.initRedis(), this.initIndex()])
+			.then(values => {
+				console.log('> Storage init is done')
+			})
+
+		// if (indexData) {
+		// 	this.indexData()
+		// }
 	}
 
 	initRedis() {
-		this.client = redis.createClient()
-		this.client.on('error', (err) => {
-			console.log('Redis error ' + err)
+		return new Promise((resolve, reject) => {
+			this.client = redis.createClient()
+			console.log('> Redis is initialized')
+			resolve(this.client)
+
+			this.client.on('error', (err) => {
+				reject(err)
+				console.log('... Redis error ' + err)
+			})
 		})
 	}
 
 	initIndex() {
-		searchIndex(this.searchIndexOptions, (err, index) => {
+		return new Promise((resolve, reject) => {
+			searchIndex(this.searchIndexOptions, (err, index) => {
+				if (err) {
+					console.log('... Index error:', err)
+					reject(err)
+					return
+				}
+
+				this.dataIndex = index
+				console.log('> Index is initialized')
+				resolve(index)
+			})
+		})
+	}
+
+	clear() {
+		this.init().then(() => {
+			this.clearRedis()
+			this.clearIndex()
+		})
+	}
+
+	clearIndex() {
+		this.dataIndex.flush((err) => {
 			if (err) {
-				console.log(err)
+				console.log('> Index can\'t be deleted', err)
 				return
 			}
 
-			this.dataIndex = index
+			console.log('> Index was deleted successfully')
+		})
+	}
+
+	clearRedis() {
+		this.client.del(this.key, (err, res) => {
+			if (err) {
+				console.log('Redis key can\'t be deleted', err)
+				return
+			}
+			if (res === 1) {
+				console.log('> Redis key was deleted successfully')
+				return
+			}
+			console.log('> Redis key was\'t created yet')
 		})
 	}
 
 	pushItem(data) {
 		this.client.rpush(this.key, JSON.stringify(data), (err, reply) => {
-			console.log('REDIS:', reply)
+			// console.log('REDIS:', reply)
 		})
 		this.addToIndex([data])
 	}
@@ -70,15 +118,14 @@ class Storage {
 		})
 	}
 
-	clearList() {
-		this.client.del(this.key)
-	}
-
 	indexData() {
-		this.getList().then(data => {
-			// console.log('!!!!!!!', data);
-			if (data && data.size) {
+		return this.getList().then(data => {
+			if (data && data.length) {
+				console.log('> Loaded data to Index from Redis -', data.length, 'items')
 				this.addToIndex(data)
+				return data
+			} else {
+				return []
 			}
 		})
 	}
@@ -90,14 +137,14 @@ class Storage {
 	searchIndex(search) {
 		const query = [
 			{
-				AND: {'text': [search.split(' ')]}
+				AND: {'content': [...search.split(' ')]}
 			},
 			{
-				AND: {'title': [search.split(' ')]}
+				AND: {'title': [...search.split(' ')]}
 			}
 		]
 
-		// console.log('query:', JSON.stringify(query))
+		console.log('> Search for', search)
 
 		// this.dataIndex.countDocs(function (err, count) {
 		// 	console.log(' >>>>> this index contains ' + count + ' documents')
