@@ -17,7 +17,7 @@ class Storage {
 					preserveCase: false
 				}
 			},
-			content: {
+			text: {
 				compositeField: false,
 				fieldOptions: {
 					preserveCase: false
@@ -31,10 +31,6 @@ class Storage {
 			.then(values => {
 				console.log('> Storage init is done')
 			})
-
-		// if (indexData) {
-		// 	this.indexData()
-		// }
 	}
 
 	initRedis() {
@@ -67,34 +63,42 @@ class Storage {
 	}
 
 	clear() {
-		this.init().then(() => {
-			this.clearRedis()
-			this.clearIndex()
-		})
+		return this.init().then(() =>
+			Promise.all([this.clearRedis(), this.clearIndex()])
+		)
 	}
 
 	clearIndex() {
-		this.dataIndex.flush((err) => {
-			if (err) {
-				console.log('> Index can\'t be deleted', err)
-				return
-			}
+		return new Promise((resolve, reject) => {
+			this.dataIndex.flush((err) => {
+				if (err) {
+					console.log('> Index can\'t be deleted', err)
+					reject(err)
+					return
+				}
 
-			console.log('> Index was deleted successfully')
+				console.log('> Index was deleted successfully')
+				resolve()
+			})
 		})
 	}
 
 	clearRedis() {
-		this.client.del(this.key, (err, res) => {
-			if (err) {
-				console.log('Redis key can\'t be deleted', err)
-				return
-			}
-			if (res === 1) {
-				console.log('> Redis key was deleted successfully')
-				return
-			}
-			console.log('> Redis key was\'t created yet')
+		return new Promise((resolve, reject) => {
+			this.client.del(this.key, (err, res) => {
+				if (err) {
+					console.log('Redis key can\'t be deleted', err)
+					reject(err)
+					return
+				}
+				if (res === 1) {
+					console.log('> Redis key was deleted successfully')
+					resolve()
+					return
+				}
+				console.log('> Redis key was\'t created yet')
+				resolve()
+			})
 		})
 	}
 
@@ -137,7 +141,7 @@ class Storage {
 	searchIndex(search) {
 		const query = [
 			{
-				AND: {'content': [...search.split(' ')]}
+				AND: {'text': [...search.split(' ')]}
 			},
 			{
 				AND: {'title': [...search.split(' ')]}

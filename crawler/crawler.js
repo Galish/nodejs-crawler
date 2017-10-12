@@ -37,9 +37,11 @@ class Crawler {
 				console.log('> Crawling done!!!')
 				console.log('  topics:', this.topicIndex)
 				console.log('  posts:', this.postIndex)
+				process.exit()
 			})
 			.catch((err) => {
 				console.log('> Crawling error:', err)
+				process.exit(1)
 			})
 	}
 
@@ -216,6 +218,7 @@ class Crawler {
 			const avatarImg = $(item).find('.postbody .post-author .author-ident .useravatar img')
 			const link = $(permalink).attr('href')
 			const id = parseInt(link.split('pid=')[1].split('#')[0])
+			const content = $(item).find('.postbody .post-entry .entry-content')
 
 			const message = {
 				id,
@@ -225,7 +228,8 @@ class Crawler {
 				link,
 				avatar: !!avatarImg.length && avatarImg.attr('src') || '',
 				title: $(item).find('.postbody .post-entry .entry-title').text(),
-				content: $(item).find('.postbody .post-entry .entry-content').html()
+				html: $(content).html(),
+				text: $(content).text()
 			}
 
 			this.onSendMessage(message)
