@@ -22,17 +22,19 @@ class Crawler {
 		this.crawlForum()
 			.then(forums => {
 				console.log('> Crawling topics')
-				return this.crawlForums(this.crawlForumPage, true)
+				return this.crawlForums(true)
 			})
 			.then(() =>
-				this.crawlForums(this.crawlForumPage, false)
+				this.crawlForums(false)
 			)
 			.then(() => {
-				console.log('Forum length:', this.forums.length);
 				console.log('> Crawling posts')
 
-				return this.crawlTopics()
+				return this.crawlTopics(true)
 			})
+			.then(() =>
+				this.crawlTopics(false)
+			)
 			.then(() => {
 				console.log('> Crawling done!!!')
 				console.log('  topics:', this.topicIndex)
@@ -69,12 +71,12 @@ class Crawler {
 		})
 	}
 
-	crawlForums(crawler, firstPage) {
+	crawlForums(firstPage) {
 		const queue = []
 
 		this.forums.forEach(uri => {
 			queue.push(
-				crawler.call(this, uri, firstPage)
+				this.crawlForumPage(uri, firstPage)
 			)
 		})
 
@@ -108,19 +110,19 @@ class Crawler {
 		})
 	}
 
-	crawlTopics() {
+	crawlTopics(firstPage) {
 		const queue = []
 
 		this.topics.forEach(uri => {
 			queue.push(
-				this.crawlTopic(uri)
+				this.crawlTopic(uri, firstPage)
 			)
 		})
 
 		return Promise.all(queue)
 	}
 
-	crawlTopic(uri) {
+	crawlTopic(uri, firstPage) {
 		return new Promise((resolve, reject) => {
 			this.crawler.queue([
 				{
@@ -132,12 +134,15 @@ class Crawler {
 							return
 						}
 
-						const onDone = (forums, topics) => {
+						const onDone = () => {
+							if (firstPage) {
+								this.topics = this.topics.filter(topicUri => topicUri !== uri)
+							}
 							resolve()
 							done()
 						}
 
-						this.parseTopicPage(err, res, onDone)
+						this.parseTopicPage(err, res, onDone, firstPage)
 					}
 				}
 			])
@@ -170,7 +175,7 @@ class Crawler {
 		done()
 	}
 
-	parseTopicPage(err, res, done) {
+	parseTopicPage(err, res, done, firstPage) {
 		if (err) {
 			console.log(err)
 			return
@@ -178,7 +183,11 @@ class Crawler {
 
 		this.fetchPosts(res.$)
 
-		done(this.topics)
+		if (firstPage) {
+			this.fetchTopicPages(res.$)
+		}
+
+		done()
 	}
 
 	fetchForums($) {
@@ -187,7 +196,6 @@ class Crawler {
 
 			if (uri && !~this.forums.indexOf(uri)) {
 				this.forums.push(uri)
-				this.topicIndex++
 			}
 		})
 	}
@@ -197,6 +205,7 @@ class Crawler {
 			const uri = $(item).find('.item-subject a').attr('href')
 			if (uri && !~this.topics.indexOf(uri)) {
 				this.topics.push(uri)
+				this.topicIndex++
 			}
 		})
 	}
@@ -207,7 +216,16 @@ class Crawler {
 
 			if (uri && !~this.forums.indexOf(uri)) {
 				this.forums.push(uri)
-				this.topicIndex++
+			}
+		})
+	}
+
+	fetchTopicPages($) {
+		$('.main-pagepost .paging a').each((index, link) => {
+			const uri = $(link).attr('href')
+
+			if (uri && !~this.topics.indexOf(uri)) {
+				this.topics.push(uri)
 			}
 		})
 	}
