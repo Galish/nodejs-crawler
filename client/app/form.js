@@ -1,4 +1,14 @@
 export default class Form extends React.PureComponent {
+	static propTypes = {
+		isWSReady: React.PropTypes.bool.isRequired,
+		onSend: React.PropTypes.func.isRequired,
+		update: React.PropTypes.object
+	}
+
+	static defaultProps = {
+		isWSReady: false
+	}
+
 	constructor(props) {
 		super(props)
 

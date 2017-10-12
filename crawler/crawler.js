@@ -14,6 +14,7 @@ class Crawler {
 		})
 		this.forums = []
 		this.topics = []
+		this.messages = []
 		this.topicIndex = 0
 		this.postIndex = 0
 	}
@@ -203,8 +204,11 @@ class Crawler {
 	fetchTopics($) {
 		$('.main-content.main-forum.forum-views .main-item').each((index, item) => {
 			const uri = $(item).find('.item-subject a').attr('href')
-			if (uri && !~this.topics.indexOf(uri)) {
-				this.topics.push(uri)
+
+			if (uri) {
+				if (!~this.topics.indexOf(uri)) {
+					this.topics.push(uri)
+				}
 				this.topicIndex++
 			}
 		})
@@ -237,7 +241,6 @@ class Crawler {
 			const link = $(permalink).attr('href')
 			const id = parseInt(link.split('pid=')[1].split('#')[0])
 			const content = $(item).find('.postbody .post-entry .entry-content')
-
 			const message = {
 				id,
 				index: this.postIndex++,
@@ -250,7 +253,10 @@ class Crawler {
 				text: $(content).text()
 			}
 
-			this.onSendMessage(message)
+			if (id && !~this.messages.indexOf(id)) {
+				this.messages.push(id)
+				this.onSendMessage(message)
+			}
 		})
 	}
 }

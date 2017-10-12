@@ -1,4 +1,13 @@
 export default class Board extends React.PureComponent {
+	static propTypes = {
+		isWSReady: React.PropTypes.bool.isRequired,
+		update: React.PropTypes.object
+	}
+
+	static defaultProps = {
+		isWSReady: false
+	}
+
 	constructor(props) {
 		super(props)
 
