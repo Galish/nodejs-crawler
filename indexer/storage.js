@@ -1,5 +1,6 @@
 const redis = require('redis')
 const searchIndex = require('search-index')
+const {batchOptions, batchSize} = require('../config')
 
 class Storage {
 	constructor(key) {
@@ -10,20 +11,7 @@ class Storage {
 		this.searchIndexOptions = {
 			batchSize: 1000
 		}
-		this.batchOptions = {
-			title: {
-				compositeField: false,
-				fieldOptions: {
-					preserveCase: false
-				}
-			},
-			text: {
-				compositeField: false,
-				fieldOptions: {
-					preserveCase: false
-				}
-			}
-		}
+		this.batchOptions = batchOptions
 	}
 
 	init() {

@@ -60,7 +60,7 @@ export default class Board extends React.PureComponent {
 						</div>
 						<div className="message__content"
 							dangerouslySetInnerHTML={{
-								__html: message.content
+								__html: message.html
 							}} />
 						<div className="message__author">
 							{/*<img src={message.avatar} />*/}
