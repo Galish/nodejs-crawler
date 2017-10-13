@@ -8,7 +8,6 @@
     "indexer": "node indexer/index.js",
 	"indexer:clear": "node indexer/clear.js",
     "crawler": "node crawler/index.js",
-    "dev": "npm-run-all --parallel dev:indexer dev:crawler",
     "dev:client": "NODE_ENV=development webpack-dev-server --config client/webpack.config.js",
     "dev:indexer": "nodemon indexer/index.js",
     "dev:crawler": "nodemon crawler/index.js",
